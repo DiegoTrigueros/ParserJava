@@ -49,6 +49,9 @@ public class AnalisisLexico extends javax.swing.JFrame {
         tabla = new javax.swing.JTable();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        lblError = new javax.swing.JLabel();
+        jButton3 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -58,7 +61,7 @@ public class AnalisisLexico extends javax.swing.JFrame {
         entradaTextoTA.setRows(5);
         jScrollPane1.setViewportView(entradaTextoTA);
 
-        jLabel2.setText("Salida:");
+        jLabel2.setText("Análisis léxico:");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -140,6 +143,11 @@ public class AnalisisLexico extends javax.swing.JFrame {
             }
         });
 
+        lblError.setForeground(new java.awt.Color(255, 0, 0));
+        jScrollPane4.setViewportView(lblError);
+
+        jButton3.setText("Ejecutar");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -148,12 +156,15 @@ public class AnalisisLexico extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 587, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 596, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGap(10, 10, 10)
                         .addComponent(jButton2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton1)))
+                        .addComponent(jButton1))
+                    .addComponent(jScrollPane4))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -163,10 +174,13 @@ public class AnalisisLexico extends javax.swing.JFrame {
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 18, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
-                    .addComponent(jButton2))
+                    .addComponent(jButton2)
+                    .addComponent(jButton3))
                 .addContainerGap())
         );
 
@@ -224,7 +238,7 @@ public class AnalisisLexico extends javax.swing.JFrame {
     
     
     public void analizar(){
-                //Expresiones regulares para identificar los tokens
+        //Expresiones regulares para identificar los tokens
         String patron = ("(ADD|ALL|ALTER|ASC|AUTO_INCREMENT|BEFORE|BETWEEN|BY|COLUMN|CONDITION|CONTINUE|CREATE|CURRENT_DATE|CURRENT_TIMESTAMP|CURRENT_TIME|DATABASE|DATABASES|DEFAULT|DELETE|DESC|DISTINCT|DROP|ELSEIF|ELSE|EXISTS|FALSE|FETCH|FOREIGN|FOR|FROM|GROUP|IF|IGNORE|INNER|INSERT|INTO|IS|JOIN|KEYS|KEY|LIKE|LIMIT|NOT|NULL|ON|ORDER|PRIMARY|READ|READS|RENAME|REPLACE|REQUIRE|RETURN|RIGHT|RLIKE|SCHEMAS|SCHEMA|SELECT|SET|SHOW|TABLE|THEN|UNDO|UNION|UNSIGNED|UNIQUE|UPDATE|USE|VALUES|WITH|WRITE)|(AND|WHERE|TRUE|OR)|(INT|VARCHAR|DECIMAL|DATETIME|BLOB|BINARY|VARBINARY|DATE|TIMESTAMP|TIME|DOUBLE|FLOAT|CHAR|BOOLEAN)|('[A-Za-z 0-9_-]+')|([0-9]+)|([A-Za-z0-9_-]+)|([>|<|+|=|-]+)|(;)|([.])|([(])|([)])|([\\[])|([\\]])|([{])|([}])|([,])|([*])");
 
         //Cadena a evaluar
@@ -336,11 +350,70 @@ public class AnalisisLexico extends javax.swing.JFrame {
             
             model.addRow(data);
         }
+        String lsjbflsjkdn = Boolean.toString(inicio(tokens, definiciones, 0));
+        if(lsjbflsjkdn.equals("true")){
+            lblError.setText("No se encontraron errores");
+        }
+    }
+    
+    //EMPIEZA EL DESVERGUEEEEE
+    public boolean inicio(ArrayList<String> token, ArrayList<String> tipo, int step){
+        boolean flag = false;
+        if(tipo.get(step) != "Palabra_reservada"){
+            flag = false;
+        }else{
+            switch(token.get(step)){
+                case "CREATE":
+                   step += 1;
+                   if(token.get(step).equals("TABLE")){
+                    flag = true;
+                   }else if(token.get(step).equals("DATABASE")){
+                    flag = database(token, tipo, step + 1);   
+                   }else{
+                    flag = false;
+                   }
+                    break;
+                case "DROP":
+                   step += 1;
+                   if(token.get(step).equals("TABLE")){
+                    flag = true;
+                   }else if(token.get(step).equals("DATABASE")){
+                    flag = database(token, tipo, step + 1);   
+                   }else{
+                    flag = false;
+                   }
+                    break;
+                case "SELECT":
+                   
+                    break;
+                case "INSERT":
+                   
+                    break;
+                case "DELETE":
+                   
+                    break;
+                case "UPDATE":
+                   
+                    break;
+            }
+        }
+        return flag;
+    }
+    
+    public boolean database(ArrayList<String> token, ArrayList<String> tipo, int step){
+        if (tipo.get(step).equals("Identificador")){
+            step += 1;
+            return true;           
+        }else{
+            lblError.setText("Error en la posición "+ step + " caracter incorrecto "+ token.get(step));
+            return false;
+        }
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea entradaTextoTA;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
@@ -348,6 +421,8 @@ public class AnalisisLexico extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JLabel lblError;
     private javax.swing.JTable tabla;
     // End of variables declaration//GEN-END:variables
 }
