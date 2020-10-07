@@ -390,7 +390,21 @@ public class AnalisisLexico extends javax.swing.JFrame {
                    
                     break;
                 case "DELETE":
-                   
+                   step += 1;
+                   if(token.get(step).equals("FROM")){
+                       step += 1;
+                       if(tipo.get(step).equals("Identificador")){
+                           step += 1;
+                           if(token.get(step).equals("WHERE")){
+                               step += 1;
+                               flag = identificador(token, tipo, step);
+                            }
+                       }else{
+                        lblError.setText(error(token, step));
+                       }
+                   }else{
+                    lblError.setText(error(token, step));
+                   }
                     break;
                 case "UPDATE":
                    
@@ -405,9 +419,41 @@ public class AnalisisLexico extends javax.swing.JFrame {
             step += 1;
             return true;           
         }else{
-            lblError.setText("Error en la posición "+ step + " caracter incorrecto "+ token.get(step));
+            lblError.setText(error(token, step));
             return false;
         }
+    }
+    //Evalua si es un identificador = 'cadena'
+    public boolean identificador(ArrayList<String> token, ArrayList<String> tipo, int step){
+        if(tipo.get(step).equals("Identificador")){
+            step += 1;
+            if(token.get(step).equals("=")){
+                step += 1;
+                if(tipo.get(step).equals("Cadena")){
+                    step += 1;
+                    if(token.size() == step){
+                        return true;
+                    }else if(token.get(step).equals("AND") || token.get(step).equals("OR")){
+                        identificador(token, tipo, step + 1);
+                    }else{
+                        lblError.setText(error(token, step));
+                        return false;
+                    }
+                }else{
+                    lblError.setText(error(token, step));
+                }
+            }else{
+                lblError.setText(error(token, step));
+                return false;
+            }
+        }else{
+            lblError.setText(error(token, step));
+        }
+        return false;
+    }
+    
+    public String error(ArrayList<String> token, int step){
+        return "Error en la posición "+ step + " caracter incorrecto "+ token.get(step);
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea entradaTextoTA;
