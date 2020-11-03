@@ -433,7 +433,23 @@ public class AnalisisLexico extends javax.swing.JFrame {
                    }
                     break;
                 case "UPDATE":
-                   
+                    step += 1;
+                   if(tipo.get(step).equals("Identificador")){
+                       step+= 1;
+                       if(token.get(step).equals("set") || token.get(step).equals("SET") || token.get(step).equals("Set")){
+                           step+=1;
+                           if(tipo.get(step).equals("Identificador")){
+                               step+=1;
+                               flag = evaluateSet(token, tipo, step);
+                           }else{
+                               lblError.setText(error(token, step));
+                               flag = false;
+                           }
+                       }else{
+                           lblError.setText(error(token, step));
+                           flag = false;
+                       }
+                   }
                     break;
             }
         }
@@ -481,6 +497,41 @@ public class AnalisisLexico extends javax.swing.JFrame {
     
     public String error(ArrayList<String> token, int step){
         return "Error en la posición "+ step + ", token incorrecto: "+ token.get(step);
+    }
+    
+    public boolean evaluateSet(ArrayList<String> token, ArrayList<String> tipo, int step){
+        while(tipo.get(step).equals("Punto_coma") == false){
+            if(step != tipo.size()){
+                if(token.get(step).equals("=")){
+                    step += 1;
+                    if(tipo.get(step).equals("Cadena")){
+                        step+=1;
+                        if(tipo.get(step).equals("Coma")){
+                            step+=1;
+                            if(tipo.get(step).equals("Identificador")){
+                                step+=1;
+                                return evaluateSet(token, tipo, step);
+                            }else{
+                                lblError.setText(error(token, step));
+                                return false;
+                            }
+                        }else if(tipo.get(step).equals("Punto_coma")){
+                            return true;
+                        }
+                    }else{
+                        lblError.setText(error(token, step));
+                        return false;
+                    }
+                }else{
+                    lblError.setText(error(token, step));
+                    return false;
+                }
+            }else{
+                lblError.setText(error(token, step));
+                return false;
+            }
+        }
+        return true;
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea entradaTextoTA;
