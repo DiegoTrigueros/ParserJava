@@ -385,8 +385,9 @@ public class AnalisisLexico extends javax.swing.JFrame {
     //EMPIEZA EL DESVERGUEEEEE
     public boolean inicio(ArrayList<String> token, ArrayList<String> tipo, int step){
         boolean flag = false;
-        if(tipo.get(step) != "Palabra_reservada"){
+        try{if(tipo.get(step) != "Palabra_reservada"){
             flag = false;
+            lblError.setText(error(token, step));
         }else{
             switch(token.get(step)){
                 case "CREATE":
@@ -410,7 +411,33 @@ public class AnalisisLexico extends javax.swing.JFrame {
                    }
                     break;
                 case "SELECT":
-                   
+                   step += 1;
+                   if(token.get(step).equals("*"))
+                   {
+                       step += 1;
+                       if (token.get(step).equals("FROM"))
+                       {
+                         step += 1;
+                          if (tipo.get(step).equals("Identificador"))
+                               {
+                                 flag = listaidentificadoresfrom(token, tipo, step);
+                               } 
+                          else
+                                {
+                                    lblError.setText(error(token, step));
+                                    flag = false;
+                                }    
+                       }
+                   }
+                   else if (tipo.get(step).equals("Identificador"))
+                   {
+                   flag = listaidentificadores(token, tipo, step);
+                   }
+                   else
+                   {
+                   lblError.setText(error(token, step));
+                   flag = false;
+                   }
                     break;
                 case "INSERT":
                    
@@ -452,8 +479,13 @@ public class AnalisisLexico extends javax.swing.JFrame {
                    }
                     break;
             }
+        }}
+        catch (Exception e){
+            flag = false;
+        lblError.setText("Sentencia incompleta");
         }
         return flag;
+      
     }
     
     public boolean database(ArrayList<String> token, ArrayList<String> tipo, int step){
@@ -465,8 +497,155 @@ public class AnalisisLexico extends javax.swing.JFrame {
             return false;
         }
     }
+    
+    //evalua los identificadores a la hora de elegir los campos a mostrar en un select
+    public boolean listaidentificadores(ArrayList<String> token, ArrayList<String> tipo, int step)
+    {
+      boolean flag = false;
+      step = step + 1;
+      if(token.get(step).equals(","))
+      {
+       step = step + 1;
+       if (tipo.get(step).equals("Identificador"))
+       {
+          return flag = listaidentificadores(token, tipo, step);
+       }
+       else
+       {
+        lblError.setText(error(token, step));
+        flag = false;
+       }
+      }
+      else if (token.get(step).equals("FROM"))
+      {
+        step = step +1;
+        if (tipo.get(step).equals("Identificador"))
+       {
+          return flag = listaidentificadoresfrom(token, tipo, step);
+       }
+         else
+       {
+         lblError.setText(error(token, step));
+        flag = false;
+       }
+      }
+      else
+      {
+         lblError.setText(error(token, step));
+         flag = false;  
+      }
+      if (flag == false)
+        {
+         lblError.setText(error(token, step));  
+        }
+     return flag;  
+    }
+    
+      //evalua los identificadores a la hora de elegir las tablas en un select
+    public boolean listaidentificadoresfrom(ArrayList<String> token, ArrayList<String> tipo, int step)
+    {
+      boolean flag = false;
+      step = step + 1;
+      if(token.size() == step){
+             lblError.setText("No se encontraron errores");
+             return true;
+              }
+      if(token.get(step).equals(","))
+      {
+       step = step + 1;
+       if (tipo.get(step).equals("Identificador"))
+       {
+          if(token.size() == step+1){
+             lblError.setText("No se encontraron errores");
+             return true;
+              }
+           else
+           {
+             flag = listaidentificadoresfrom(token, tipo, step);
+           }
+       }
+       else
+       {
+        lblError.setText(error(token, step));
+        return flag = false;
+       }
+      }
+      else if (token.get(step).equals("WHERE"))
+      {
+        step = step +1;
+        if (tipo.get(step).equals("Identificador"))
+       {
+           return flag = identificador(token, tipo, step);
+       }
+         else
+       {
+        lblError.setText(error(token, step));
+         flag = false;
+       }
+      }
+       else if (token.get(step).equals("ORDER"))
+      {
+        step = step +1;
+        if (token.get(step).equals("BY"))
+       {
+           //akíii
+           return flag = identificadororderb(token, tipo, step+1);
+       }
+         else
+       {
+        lblError.setText(error(token, step));
+        flag = false;
+       }
+      }
+      else
+      {
+         lblError.setText(error(token, step));
+          flag = false;  
+      }
+      if (flag == false)
+        {
+         lblError.setText(error(token, step));  
+        }
+     return flag;  
+    }
+    
+    //Evalua la secuencia de identificadores después de un ORDER BY 
+      public boolean identificadororderb(ArrayList<String> token, ArrayList<String> tipo, int step){
+        boolean flag = false;
+        if(tipo.get(step).equals("Identificador")){
+            step += 1;
+            if(token.size() == step)
+            {
+               lblError.setText("No se encontraron errores");
+               flag = true;
+            }
+            else if(token.get(step).equals("ASC")||token.get(step).equals("DESC")){
+               step += 1;
+              if(token.size() == step)
+            {
+               lblError.setText("No se encontraron errores");
+               flag = true;
+            }
+              else if (token.get(step).equals(","))
+              {
+              return flag = identificadororderb(token, tipo, step+1);
+              }
+            }
+            else{
+                flag = false;
+            }
+        }else{
+            flag = false;
+        }
+        if (flag == false)
+        {
+         lblError.setText(error(token, step));  
+        }
+        return flag;
+    }
     //Evalua si es un identificador = 'cadena'
     public boolean identificador(ArrayList<String> token, ArrayList<String> tipo, int step){
+        boolean flag = false;
         if(tipo.get(step).equals("Identificador")){
             step += 1;
             if(token.get(step).equals("=")){
@@ -475,24 +654,26 @@ public class AnalisisLexico extends javax.swing.JFrame {
                     step += 1;
                     if(token.size() == step){
                         lblError.setText("No se encontraron errores");
-                        return true;
+                         flag = true;
                     }else if(token.get(step).equals("AND") || token.get(step).equals("OR")){
-                        identificador(token, tipo, step + 1);
+                        flag = identificador(token, tipo, step + 1);
                     }else{
-                        lblError.setText(error(token, step));
-                        return false;
+                                 lblError.setText(error(token, step));  
+                        flag = false;
                     }
                 }else{
-                    lblError.setText(error(token, step));
+                    flag = false;
                 }
             }else{
-                lblError.setText(error(token, step));
-                return false;
+                flag = false;
             }
         }else{
-            lblError.setText(error(token, step));
         }
-        return false;
+        if (flag == false)
+        {
+         lblError.setText(error(token, step));  
+        }
+        return flag;
     }
     
     public String error(ArrayList<String> token, int step){
