@@ -393,7 +393,36 @@ public class AnalisisLexico extends javax.swing.JFrame {
                 case "CREATE":
                    step += 1;
                    if(token.get(step).equals("TABLE")){
-                    flag = true;
+                    //flag = true;
+                    step = step + 1;
+                       if(tipo.get(step).equals("Identificador")){
+                        step = step + 1;
+                            if(token.get(step).equals("(")){
+                            step = step + 1;
+                                if(tipo.get(step).equals("Identificador")){
+                                 step = step + 1;
+                                    if(tipo.get(step).equals("Tipo_dato")){
+                                     flag = TipoDato(token, tipo, step);
+                                    }
+                                    else {
+                                    lblError.setText(error(token, step));
+                                    flag = false; 
+                                    }
+                                }
+                                else {
+                                lblError.setText(error(token, step));
+                                flag = false; 
+                                }
+                            }
+                            else {
+                             lblError.setText(error(token, step));
+                             flag = false; 
+                             }
+                        }
+                       else {
+                       lblError.setText(error(token, step));
+                       flag = false; 
+                       }
                    }else if(token.get(step).equals("DATABASE")){
                     flag = database(token, tipo, step + 1);   
                    }else{
@@ -403,7 +432,26 @@ public class AnalisisLexico extends javax.swing.JFrame {
                 case "DROP":
                    step += 1;
                    if(token.get(step).equals("TABLE")){
-                    flag = true;
+                    //flag = true;
+                    step += 1;
+                    if(tipo.get(step).equals("Identificador")){
+                        step += 1;
+                        //flag = droptable(token, tipo, step);
+                            if(token.size() == step){
+                            lblError.setText("No se encontraron errores");
+                            return flag = true;
+                            }
+                            else if(token.get(step).equals(",")){
+                                flag = droptable(token, tipo, step);
+                            }
+                             else{
+                              lblError.setText(error(token, step));
+                              flag = false; 
+                        	}
+                    }else {
+                        lblError.setText(error(token, step));
+                                flag = false; 
+                        }
                    }else if(token.get(step).equals("DATABASE")){
                     flag = database(token, tipo, step + 1);   
                    }else{
@@ -488,6 +536,123 @@ public class AnalisisLexico extends javax.swing.JFrame {
       
     }
     
+    //DROP TABLE
+    public boolean droptable(ArrayList<String> token, ArrayList<String> tipo, int step){
+        boolean flag = false;
+        step += 1;
+            if(tipo.get(step).equals("Identificador")){
+                step += 1;
+                if(token.size() == step){
+                lblError.setText("No se encontraron errores");
+                return flag = true;
+                    }
+                else if(token.get(step).equals(",")){
+                 return flag = droptable(token, tipo, step);
+               }
+                else{
+                    lblError.setText(error(token, step));
+                    flag = false; 
+                    }
+                }
+            else{
+              lblError.setText(error(token, step));
+              flag = false; 
+               }
+        return flag;
+    }
+    //Evaluar el tipo de dato en create table 
+    public boolean TipoDato(ArrayList<String> token, ArrayList<String> tipo, int step){
+        boolean flag = false;
+        if(token.get(step).equals("VARCHAR") || token.get(step).equals("BINARY") || token.get(step).equals("FLOAT") || token.get(step).equals("CHAR") || token.get(step).equals("DECIMAL") || token.get(step).equals("DOUBLE")){
+            step += 1;
+            if(token.get(step).equals("(")){
+                step += 1;
+                if(tipo.get(step).equals("Numero")){
+                    step += 1;
+                    if(token.get(step).equals(")")){
+                        step += 1;
+                        if(token.get(step).equals(",")){
+                            step += 1;
+                            if(tipo.get(step).equals("Identificador")){
+                                 step = step + 1;
+                                    if(tipo.get(step).equals("Tipo_dato")){
+                                     flag = TipoDato(token, tipo, step);
+                                    }
+                                    else {
+                                    lblError.setText(error(token, step));
+                                    flag = false; 
+                                    }
+                              }
+                                else {
+                                lblError.setText(error(token, step));
+                                flag = false; 
+                            }
+                        } 
+                        else if(token.get(step).equals(")")){
+                            step += 1;
+                             if(token.size() == step){
+                            lblError.setText("No se encontraron errores");
+                            return flag = true;
+                            }
+                        }
+                        else {
+                         lblError.setText(error(token, step));
+                         flag = false; 
+                              }
+                    }
+                    else {
+                     lblError.setText(error(token, step));
+                     flag = false; 
+                     }
+                }
+                else {
+                 lblError.setText(error(token, step));
+                 flag = false; 
+                  }
+             }
+            else {
+             lblError.setText(error(token, step));
+             flag = false; 
+                }
+            
+        } else if(token.get(step).equals("INT") || token.get(step).equals("DATETIME") || token.get(step).equals("BLOB") || token.get(step).equals("VARBINARY") || token.get(step).equals("DATE") || token.get(step).equals("TIMESTAMP") || token.get(step).equals("TIME") || token.get(step).equals("BOOLEAN")){
+            step += 1;
+              if(token.get(step).equals(",")){
+              step += 1;
+                if(tipo.get(step).equals("Identificador")){
+                  step = step + 1;
+                  if(tipo.get(step).equals("Tipo_dato")){
+                  flag = TipoDato(token, tipo, step);
+                    }
+                  else {
+                    lblError.setText(error(token, step));
+                    flag = false; 
+                   }
+                }
+                else {
+                lblError.setText(error(token, step));
+                flag = false; 
+                    }
+            } else if(token.get(step).equals(")")){
+                step += 1;
+                            if(token.size() == step){
+                            lblError.setText("No se encontraron errores");
+                            return flag = true;
+                            }
+                       }
+                        else {
+                         lblError.setText(error(token, step));
+                         flag = false; 
+                          }
+        }
+            else {
+            lblError.setText(error(token, step));
+            flag = false; 
+            }
+              return flag;
+     }    
+    
+        
     public boolean database(ArrayList<String> token, ArrayList<String> tipo, int step){
         if (tipo.get(step).equals("Identificador")){
             step += 1;
