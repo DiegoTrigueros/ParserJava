@@ -382,7 +382,7 @@ public class AnalisisLexico extends javax.swing.JFrame {
         }
     }
     
-    //EMPIEZA EL DESVERGUEEEEE
+    //EMPIEZA ANÁLISIS SINTÁCTICO 
     public boolean inicio(ArrayList<String> token, ArrayList<String> tipo, int step){
         boolean flag = false;
         try{if(tipo.get(step) != "Palabra_reservada"){
@@ -488,7 +488,32 @@ public class AnalisisLexico extends javax.swing.JFrame {
                    }
                     break;
                 case "INSERT":
-                   
+                    step += 1;
+                    if (token.get(step).equals("INTO")) {
+                        step += 1;
+                          if (tipo.get(step).equals("Identificador")) {
+                             step += 1;
+                             if (token.get(step).equals("(")) {
+                              step += 1;
+                              flag = listid(token, tipo, step);
+                              }
+                            else
+                            {
+                             lblError.setText(error(token, step));
+                             flag = false;
+                            }
+                          }
+                          else
+                          {
+                             lblError.setText(error(token, step));
+                             flag = false;
+                          }
+                    }
+                    else
+                    {
+                    lblError.setText(error(token, step));
+                    flag = false;
+                    }          
                     break;
                 case "DELETE":
                    step += 1;
@@ -534,6 +559,79 @@ public class AnalisisLexico extends javax.swing.JFrame {
         }
         return flag;
       
+    }
+    
+    //Lista de identificadores
+    public boolean listid(ArrayList<String> token, ArrayList<String> tipo, int step){
+        boolean flag = false;
+         if (tipo.get(step).equals("Identificador")) {
+             step +=1;  
+             if (token.get(step).equals(",")) {
+                 step +=1;
+                 flag = listid(token, tipo, step);
+             }
+             else if (token.get(step).equals(")")) {
+                 step +=1;
+                 if (token.get(step).equals("VALUES")) {
+                 step +=1;
+                   if (token.get(step).equals("(")) {
+                   step +=1;
+                   flag = listid2(token, tipo, step);
+                   }
+                   else
+                   {
+                    lblError.setText(error(token, step));
+                    flag = false;
+                   }
+                 }
+                 else
+               {
+                lblError.setText(error(token, step));
+                flag = false;
+               }
+             }
+             else
+             {
+                lblError.setText(error(token, step));
+                flag = false;
+             }
+        }
+         else
+         {
+             lblError.setText(error(token, step));
+             flag = false;
+         } 
+        return flag;
+    }
+    
+    //Lista de identificadores 2
+    public boolean listid2(ArrayList<String> token, ArrayList<String> tipo, int step){
+        boolean flag = false;
+            if (tipo.get(step).equals("Cadena") || tipo.get(step).equals("Numero")) {
+             step +=1;  
+             if (token.get(step).equals(",")) {
+                 step +=1;
+                 flag = listid2(token, tipo, step);
+             }
+             else if (token.get(step).equals(")")) {
+                 step +=1;
+                 if(token.size() == step){
+                lblError.setText("No se encontraron errores");
+                return flag = true;
+                    }           
+             }
+             else
+             {
+                lblError.setText(error(token, step));
+                flag = false;
+             }
+        }
+         else
+         {
+             lblError.setText(error(token, step));
+             flag = false;
+         } 
+        return flag;
     }
     
     //DROP TABLE
